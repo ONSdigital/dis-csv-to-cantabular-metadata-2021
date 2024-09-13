@@ -172,6 +172,9 @@ The `Minimum_Threshold_Person` and `Minimum_Threshold_HH` fields in `Dataset_Var
 | `Geographic_Coverage` | `String!` | `Dataset.Geographic_Coverage` | `Dataset.Geographic_Coverage_Welsh` |
 | `Dataset_Population` | `String!` | `Dataset.Dataset_Population` | `Dataset.Population_Welsh` |
 | `Last_Updated` | `String` | `Dataset.Last_Updated` | |
+| `Origin_Variable_Mnemonic` | `String` | `Dataset.Origin_Variable_Mnemonic` | |
+| `Destination_Variable_Mnemonic` | `String` | `Dataset.Destination_Variable_Mnemonic` | |
+| `OD_Flag` | `String` | `Dataset.OD_Flag` | |
 | `Contact` | `Contact` | Keyed on `Dataset.Contact_Id` | |
 | `Version` | `String!` | `Dataset.Version` | |
 | `Related_Datasets` | `[String]!` | List of `Related_Datasets.Related_Dataset_Mnemonic` values keyed on `Related_Datasets.Dataset_Mnemonic` | |
@@ -455,8 +458,8 @@ This query gets the version information from the service metadata.
           "geography_file": "geography.csv",
           "versions": {
             "data": "1",
-            "schema": "1.4",
-            "script": "1.4.0"
+            "schema": "1.5",
+            "script": "1.5.0"
           }
         }
       }

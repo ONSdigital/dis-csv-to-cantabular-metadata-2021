@@ -101,6 +101,9 @@ type TableMetadata {
   Geographic_Coverage: String!
   Dataset_Population: String!
   Last_Updated: String
+  Origin_Variable_Mnemonic: String
+  Destination_Variable_Mnemonic: String
+  OD_Flag: String
   Contact: Contact
   Version: String!
   Related_Datasets: [String]!

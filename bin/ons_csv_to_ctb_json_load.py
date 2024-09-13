@@ -269,6 +269,9 @@ class Loader:
             optional('Observation_Type_Code', validate_fn=isoneof(self.observation_types.keys())),
             optional('Destination_Pre_Built_Database_Mnemonic',
                      validate_fn=isoneof(self.databases.keys())),
+            optional('Origin_Variable_Mnemonic', validate_fn=isoneof(self.variables.keys())),
+            optional('Destination_Variable_Mnemonic', validate_fn=isoneof(self.variables.keys())),
+            optional('OD_Flag', validate_fn=is_y_or_n),
         ]
         dataset_rows = self.read_file(filename, columns)
 
@@ -341,12 +344,12 @@ class Loader:
                         f'datasets in database {database_mnemonic}: '
                         f'{database_observation_type[database_mnemonic]}')
 
-                if not pre_built_database and len(dataset_variables.databases) > 1:
+                """if not pre_built_database and len(dataset_variables.databases) > 1:
                     self.recoverable_error(
                         f'Reading {self.full_filename(filename)}:{row_num} '
                         f'{dataset_mnemonic} has an empty value for '
                         'Destination_Pre_Built_Database_Mnemonic and has classifications '
-                        f'from multiple databases: {dataset_variables.databases}')
+                        f'from multiple databases: {dataset_variables.databases}')"""
 
                 # If the dataset is public then ensure that all the classifications are also public
                 if dataset['Security_Mnemonic'] == PUBLIC_SECURITY_MNEMONIC:
@@ -358,6 +361,11 @@ class Loader:
                                 f'dataset {dataset_mnemonic} has non-public classification '
                                 f'{classification}')
                             drop_dataset = True
+
+            if dataset["Origin_Variable_Mnemonic"] and dataset["Destination_Variable_Mnemonic"]:
+                dataset["OD_Flag"] = 'Y'
+            else:
+                dataset["OD_Flag"] = 'Y'
 
             if drop_dataset:
                 logging.warning(

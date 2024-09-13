@@ -1,6 +1,13 @@
 Release Notes
 =============
 
+1.5
+-----
+
+- Update to metadata schema version 1.5.
+  - Expose new `Dataset.Origin_Variable_Mnemonic`, `Dataset.Destination_Variable_Mnemonic`  and
+    `Dataset.OD_Flag` fields.
+
 1.3.4
 -----
 
@@ -14,7 +21,7 @@ Release Notes
     `Statistical_Unit.Statistical_Unit_Label_Welsh` fields.
   - Expose new `Variable.Variable_Short_Description` and
     `Variable.Variable_Short_Description_Welsh` fields.
-  - Support new `Variable.Quality_Statement_Text_Welsh` field. 
+  - Support new `Variable.Quality_Statement_Text_Welsh` field.
   - Expose dataset and variable keywords from `Dataset_Keyword` and `Variable_Keyword`.
 - Cantabular version 10.2.3 is now the default version. The file format for version 10.2.3 is
   the same for all currently supported versions of Cantabular.
@@ -130,4 +137,3 @@ Release Notes
 ---------
 - Supports metadata schema version 1.0
 - Supports Cantabular version 9.2.0
-
