@@ -1,5 +1,4 @@
-Introduction
-============
+# Introduction
 
 `bin/ons_csv_to_ctb_json_main.py` is an application that loads source metadata files in CSV format
 and converts them to hierarchical JSON that can be loaded into `cantabular-metadata`.
@@ -11,15 +10,31 @@ This is version `1.5.0` of the CSV to JSON processing software and is subject to
 
 The applications only use packages in the Python standard library.
 
-Converting CSV to JSON
-======================
+## Converting CSV to JSON
 
 Most of the source metadata are contained in a set of CSV files based on the metadata schema.
 However, category codes, names and Welsh names for geographic variables are supplied in separate
 lookup files. The main CSV file set must not contain categories for geographic variables.
 
-Using test data
----------------
+### For production upload
+
+There is a [Makefile](/Makefile) provided to simulate the now decommissioned DAP pipelines.
+The Makefile picks up from the C21 outputs process assuming that the files have been supplied in the agreed filename format in a single zip.
+
+> :book: the current supporting geographies for 1.5.0 are in the `/geography` directory
+
+The recommendation would be to do the following
+
+```bash
+# First run with `best effort` as false, if there are any errors then open a dialogue with the data sender and provide the errors
+make run csv_zip_file=/path/to/csv_zip_file.zip geography_dir=/path/to/geography best_effort=false
+# Most likely the errors will be accepted and you can re run with `best efforts`
+make run csv_zip_file=/path/to/csv_zip_file.zip geography_dir=/path/to/geography best_effort=true
+```
+
+Once the file is generated you can upload to the desired environment `ingest-internal-data` bucket and continue in the existing operations guide.
+
+## Using test data
 
 The `test/testdata` directory contains some sample CSV files that are used as part of continuous
 integration testing. They contain dummy data that are intended to exercise the capabilities of the
@@ -29,13 +44,15 @@ specified using the `-g` option e.g. `-g file1.csv -g file2.csv`.
 The data can be used to verify the operation of `ons_csv_to_ctb_json_main.py`.
 
 To convert the source CSV files to JSON files in `ctb_metadata_files/` run:
-```
+
+```bash
 python3 bin/ons_csv_to_ctb_json_main.py -i test/testdata/ -d test/testdata/geography -o ctb_metadata_files/
 ```
 
 Basic logging will be displayed by default, including the number of high-level Cantabular metadata
 objects loaded and the name of the output files.
-```
+
+```bash
 > python3 bin/ons_csv_to_ctb_json_main.py -i test/testdata/ -d test/testdata/geography -o ctb_metadata_files/
 t=2022-01-01 00:00:00,000 lvl=INFO msg=ons_csv_to_ctb_json_main.py version 1.5.0
 t=2022-01-01 00:00:00,000 lvl=INFO msg=CSV source directory: test/testdata/
@@ -58,7 +75,7 @@ t=2022-01-01 00:00:00,000 lvl=INFO msg=Written service metadata file to: ctb_met
 
 More detailed information can be obtained by running with a `-l DEBUG` flag e.g.:
 
-```
+```bash
 > python3 bin/ons_csv_to_ctb_json_main.py -i test/testdata/ -d test/testdata/geography -o ctb_metadata_files/ -l DEBUG
 t=2022-01-01 00:00:00,000 lvl=INFO msg=ons_csv_to_ctb_json_main.py version 1.5.0
 t=2022-01-01 00:00:00,000 lvl=INFO msg=CSV source directory: test/testdata/
@@ -100,34 +117,32 @@ t=2022-01-01 00:00:00,000 lvl=INFO msg=Written table metadata file to: ctb_metad
 t=2022-01-01 00:00:00,000 lvl=INFO msg=Written service metadata file to: ctb_metadata_files/cantabm_v10-2-3_unknown-metadata-version_service-md_20220101-1.json
 ```
 
-Version information
--------------------
+## Version information
 
 One of the log lines contains build and version information such as this:
 
-```
+``` txt
 t=2022-01-01 00:00:00,000 lvl=INFO msg=Build created=2022-01-01T00:00:00.000000 best_effort=False dataset_filter="" geography_file="geography1.csv,geography2.csv" versions_data=30 versions_schema=1.5 versions_script=1.5.0
 ```
 
-  - `created` is the time at which the script was executed.
-  - `best_effort` is `True` if the `--best-effort` flag was set, else it is `False`.
-  - `dataset_filter` is the JSON-quoted `--dataset-filter` value if that option was set, else it is an empty string.
-  - `geography_file` is the JSON-quoted list of basenames of the geography files supplied with the `-g` or `-d` flags if either of
-    those options was set, else it is an empty string.
-  - `versions_data` is the metadata source version and is taken from the last record in `Metadata_Version.csv`.
-  - `versions_schema` is the ONS metadata schema version.
-  - `versions_script` is the version of the Python script.
+- `created` is the time at which the script was executed.
+- `best_effort` is `True` if the `--best-effort` flag was set, else it is `False`.
+- `dataset_filter` is the JSON-quoted `--dataset-filter` value if that option was set, else it is an empty string.
+- `geography_file` is the JSON-quoted list of basenames of the geography files supplied with the `-g` or `-d` flags if either of
+  those options was set, else it is an empty string.
+- `versions_data` is the metadata source version and is taken from the last record in `Metadata_Version.csv`.
+- `versions_schema` is the ONS metadata schema version.
+- `versions_script` is the version of the Python script.
 
 This information is embedded in the service metadata and can be used to establish the source of the
 metadata that is available via `cantabular-metadata` or `cantabular-api-ext`.
 An example query for retrieving this data can be found in the [cantabular-metadata section](#load-the-json-files-with-cantabular-metadata).
 
-
-Output file names
------------------
+## Output file names
 
 The output file names are formatted as follows:
-```
+
+``` bash
 <prefix>cantabm_10-2-3_<metadata master version>_dataset-md_<date as yyyymmdd-><build number>.json
 <prefix>cantabm_10-2-3_<metadata master version>_service-md_<date as yyyymmdd-><build number>.json
 <prefix>cantabm_10-2-3_<metadata master version>_tables-md_<date as yyyymmdd-><build number>.json
@@ -135,7 +150,8 @@ The output file names are formatted as follows:
 
 The `prefix`, `metadata master version` and `build number` can be specified using command line
 arguments as described in the help text for `ons_csv_to_ctb_json_main.py`:
-```
+
+``` bash
   -p {d,t,tu}, --file_prefix {d,t,tu}
                         Prefix to use in output filenames: d=dev, t=test,
                         tu=tuning (default: no prefix i.e. operational)
@@ -148,7 +164,8 @@ arguments as described in the help text for `ons_csv_to_ctb_json_main.py`:
 ```
 
 For example:
-```
+
+``` bash
 > python3 bin/ons_csv_to_ctb_json_main.py -i test/testdata/ -d test/testdata/geography -o ctb_metadata_files/ -p t -m test -b 42
 t=2022-01-01 00:00:00,000 lvl=INFO msg=ons_csv_to_ctb_json_main.py version 1.5.0
 t=2022-01-01 00:00:00,000 lvl=INFO msg=CSV source directory: test/testdata/
@@ -169,8 +186,7 @@ t=2022-01-01 00:00:00,000 lvl=INFO msg=Written table metadata file to: ctb_metad
 t=2022-01-01 00:00:00,000 lvl=INFO msg=Written service metadata file to: ctb_metadata_files/t_cantabm_v10-2-3_test_service-md_20220101-42.json
 ```
 
-Using data with errors
-----------------------
+## Using data with errors
 
 `ons_csv_to_ctb_json_main.py` fails on the first error. This is intentional as the data must be
 correct for use in production. For debug purposes a `--best-effort` flag can be used to continue
@@ -179,7 +195,8 @@ will result in some data loss as some records will be dropped and some fields wi
 
 This repository contains some test data that is full of errors. It can be used to demonstrate the usage
 of the `--best-effort` flag as shown below:
-```
+
+``` bash
 > python3 bin/ons_csv_to_ctb_json_main.py -i test/testdata/best_effort  -o ctb_metadata_files/ -m best-effort --best-effort
 t=2022-01-01 00:00:00,000 lvl=INFO msg=ons_csv_to_ctb_json_main.py version 1.5.0
 t=2022-01-01 00:00:00,000 lvl=INFO msg=CSV source directory: test/testdata/best_effort
@@ -240,8 +257,7 @@ on row 4 of the `Dataset.csv` file. The header will be row 1.
 
 The `--best-effort` flag is for debug purposes only.
 
-Processing only specific datasets
----------------------------------
+## Processing only specific datasets
 
 The `--dataset-filter` option can be used to filter the datasets which are processed and included
 in the output JSON. A comma separated list of `Dataset_Mnemonic` prefixes is provided.
@@ -253,7 +269,7 @@ This option may be used in conjunction with other options.
 This functionality can be demonstrated using test data in `test/testdata/dataset_filter`, where only
 datasets with a `Dataset_Mnemonic` beginning with **TS** are processed.
 
-```
+``` bash
 > python3 bin/ons_csv_to_ctb_json_main.py -i test/testdata/dataset_filter/ -o ctb_metadata_files/ --dataset-filter TS
 t=2022-01-01 00:00:00,000 lvl=INFO msg=ons_csv_to_ctb_json_main.py version 1.5.0
 t=2022-01-01 00:00:00,000 lvl=INFO msg=CSV source directory: test/testdata/dataset_filter/
@@ -272,18 +288,18 @@ t=2022-01-01 00:00:00,000 lvl=INFO msg=Written table metadata file to: ctb_metad
 t=2022-01-01 00:00:00,000 lvl=INFO msg=Written service metadata file to: ctb_metadata_files/cantabm_v10-2-3_unknown-metadata-version_service-md_20220101-1.json
 ```
 
-Using 2011 census teaching file metadata
-----------------------------------------
+## Using 2011 census teaching file metadata
 
 The ONS produced a 1% sample microdata teaching file based on 2011 census data. It can be accessed here:
 
-https://www.ons.gov.uk/census/2011census/2011censusdata/censusmicrodata/microdatateachingfile
+<https://www.ons.gov.uk/census/2011census/2011censusdata/censusmicrodata/microdatateachingfile>
 
 We have generated some sample metadata for this dataset using publicly available sources. The CSV source files
 can be found in the `sample_2011` directory.
 
 Use this command to convert the files to JSON (with debugging enabled):
-```
+
+```bash
 > python3 bin/ons_csv_to_ctb_json_main.py -i sample_2011/ -g sample_2011/geography.csv -o ctb_metadata_files/ -m 2011-sample -l DEBUG
 t=2022-01-01 00:00:00,000 lvl=INFO msg=ons_csv_to_ctb_json_main.py version 1.5.0
 t=2022-01-01 00:00:00,000 lvl=INFO msg=CSV source directory: sample_2011/
@@ -326,47 +342,45 @@ t=2022-01-01 00:00:00,000 lvl=INFO msg=Written table metadata file to: ctb_metad
 t=2022-01-01 00:00:00,000 lvl=INFO msg=Written service metadata file to: ctb_metadata_files/cantabm_v10-2-3_2011-sample_service-md_20220101-1.json
 ```
 
-Load the JSON files with cantabular-metadata
-============================================
+## Load the JSON files with cantabular-metadata
 
 To load the generated JSON files into `cantabular-metadata` (version 10.2.3) run the following
 commands, substituting the file names and paths as appropriate:
-```
+
+```bash
 cd ctb_metadata_files
 CANTABULAR_METADATA_GRAPHQL_TYPES_FILE=metadata.graphql CANTABULAR_METADATA_SERVICE_FILE=cantabm_v10-2-3_unknown-metadata-version_service-md_20220101-1.json CANTABULAR_METADATA_DATASET_FILES=cantabm_v10-2-3_unknown-metadata-version_dataset-md_20220101-1.json CANTABULAR_METADATA_TABLE_FILES=cantabm_v10-2-3_unknown-metadata-version_tables-md_20220101-1.json <PATH_TO_BINARY>/cantabular-metadata
 ```
 
 The metadata can be queried via a GraphQL interface. By default this is accessible at:
 
-http://localhost:8493/graphql
+<http://localhost:8493/graphql>
 
 `cantabular-metadata` is packaged with the [GraphiQL](https://github.com/graphql/graphiql) IDE
 and this can be used to construct GraphQL queries when the service is accessed via a web browser.
 
 This query can be used to query the build information that is reported in the build logs:
-http://127.0.0.1:8493/graphql?query=%7Bservice%7Bmeta%7Bbuild%7Bcreated%20geography_file%20dataset_filter%20best_effort%20versions%7Bdata%20schema%20script%7D%7D%7D%7D%7D%0A&variables=%7B%0A%20%20%22dataset%22%3A%20%22UR%22%0A%7D
+<http://127.0.0.1:8493/graphql?query=%7Bservice%7Bmeta%7Bbuild%7Bcreated%20geography_file%20dataset_filter%20best_effort%20versions%7Bdata%20schema%20script%7D%7D%7D%7D%7D%0A&variables=%7B%0A%20%20%22dataset%22%3A%20%22UR%22%0A%7D>
 
 The following query can be used to obtain Welsh information for a single named variable (from the test data):
 
-http://localhost:8493/graphql?query=%7Bdataset(name%3A%22DB1%22%2Clang%3A%22cy%22)%7Bvars(names%3A%5B%22CLASS1%20(Codebook)%22%5D)%7BcatLabels%20name%20label%20all%7D%7D%7D%0A
+<http://localhost:8493/graphql?query=%7Bdataset(name%3A%22DB1%22%2Clang%3A%22cy%22)%7Bvars(names%3A%5B%22CLASS1%20(Codebook)%22%5D)%7BcatLabels%20name%20label%20all%7D%7D%7D%0A>
 
 This query can be used to obtain information for a single named table:
 
-http://localhost:8493/graphql?query=%7Bservice%7Btables(names%3A%20%5B%22DS1%22%5D)%7Bname%20datasetName%20vars%20description%20label%20all%7D%7D%7D%0A
+<http://localhost:8493/graphql?query=%7Bservice%7Btables(names%3A%20%5B%22DS1%22%5D)%7Bname%20datasetName%20vars%20description%20label%20all%7D%7D%7D%0A>
 
-Tests
-=====
+## Tests
 
 This repository has tests written using the `unittest` framework. They are run as part of
 Continuous Integration testing in the GitHub repository. They can be run manually by running this
 command from the base directory:
 
-```
+```bash
 PYTHONPATH=test:bin python3 -m unittest -v
 ```
 
-Other Cantabular versions
-=========================
+## Other Cantabular versions
 
 The `-v` argument can be used to generate output files that are compatible with a different version of Cantabular.
 At present only 9.3.0, 10.0.0, 10.1.0, 10.1.1, 10.2.0, 10.2.1, 10.2.2 and 10.2.3 are supported. If any other version is specified then the specified version
